@@ -1,6 +1,6 @@
 # @rsc-labs/highlights-plugin
 
-<img src='./docs/highlighter.png' width='100' height='150' alt='Highlights screenshot'>
+<img src='https://raw.githubusercontent.com/RSC-Labs/backstage-highlights-plugin/main/docs/highlighter.png' width='100' height='150' alt='Highlights screenshot'>
 
 Backstage Highlights Plugin is configurable and customizable plugin for viewing the most important information about your entity.
 
@@ -49,7 +49,7 @@ const overviewContent = (
 
 For the best UX we <b> strongly recommend </b> to use as much horizontal space as possible. Thanks to that you will have your highlights on top of your page as a bar.
 
-<img src='./docs/built_in_example.PNG' alt='Built-in example'>
+<img src='https://raw.githubusercontent.com/RSC-Labs/backstage-highlights-plugin/main/docs/built_in_example.PNG' alt='Built-in example'>
 
 Of course, you can also make it smaller and near the other card.
 
@@ -65,7 +65,7 @@ At this moment, "highlights plugin" comes with built-in support of basic informa
 
 You can click at the field and get more information. For example, when you click on latest tag you will get longer history:
 
-<img src='./docs/commit_table.PNG' alt='Built-in example'>
+<img src='https://raw.githubusercontent.com/RSC-Labs/backstage-highlights-plugin/main/docs/commit_table.PNG' alt='Built-in example'>
 
 Other fields can have similar functionality, but it depends on the provider (Github API provides more information)
 
@@ -89,95 +89,6 @@ export interface EntityHighlightsProps {
 2) customFields - this parameter can let you define your own field. Every custom field contains:
     - fieldLabel - it is a title of the field (you can see it in built-in fields). It is optional parameter as your field can be also without a title (example: Clone button in built-in fields)
     - field - it is simple React component
-
-# Backend plugin
-
-Install:
-```bash
-cd packages/backend
-yarn add @rsc-labs/backstage-highlights-plugin-backend
-```
-
-Create a file `packages/backend/src/plugins/highlights.ts`:
-```typescript
-import {
-    createRouter,
-  } from '@rsc-labs/backstage-highlights-plugin-backend';
-  import { Router } from 'express';
-  import { PluginEnvironment } from '../types';
-  
-  export default async function createPlugin(
-    env: PluginEnvironment,
-  ): Promise<Router> {
-    return await createRouter({
-      discovery: env.discovery,
-      tokenManager: env.tokenManager,
-      logger: env.logger,
-      config: env.config
-    });
-  }
-```
-
-Add the plugin to `packages/backend/src/index.ts`:
-```typescript
-// import:
-import highlights from './plugins/highlights';
-...
-
-async function main() {
-  ...
-  // add env
-  const highlightsEnv = useHotMemoize(module, () => createEnv('highlights'));
-  ...
-  // add to router
-  apiRouter.use('/highlights', await highlights(highlightsEnv));
-  ...
-}
-```
-
-## Catalog-info.yaml
-
-Backend plugin supports two providers - Github and Gitlab. They are providing information for built-in fields mentioned in Frontend plugin.
-Plugin uses following annotations from catalog-info.yaml:
-
-```yaml
-apiVersion: backstage.io/v1alpha1
-kind: Component
-metadata:
-  name: example-website
-  annotations:
-    github.com/project-slug: rsc-labs/backstage-changelog-plugin
-    gitlab.com/project-slug: owner/project
-```
-
-Both annotations are supported (so your component can be in github or gitlab). In theory case if you have both annotations, github takes precedence.
-
-## App-config
-
-To have properly working Github or Gitlab, you need also provide information about token and potentially about base url.
-You have two options how to provide it
-1) Custom highlights configuration
-2) Integration configuration
-
-Below you can find implemented both options:
-```yaml
-highlights:
-  gitlab:
-    token: ${GITLAB_TOKEN}
-    apiBaseUrl: https://gitlab.com/api/v4
-  github:
-    token: ${GITHUB_TOKEN}
-
-integrations:
-  gitlab:
-      - token: ${GITLAB_TOKEN}
-  github:
-      - token: ${GITHUB_TOKEN}
-```
-
-If provided, "highlights" configuration takes precendece over "integrations".
-<b>Note:</b> "highlights" configuration requires providing "apiBaseUrl", while it is not needed in "integrations" (if you are using default one)
-
 
 ## TODO
 
