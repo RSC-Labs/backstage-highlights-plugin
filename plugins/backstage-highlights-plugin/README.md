@@ -1,4 +1,4 @@
-# @rsc-labs/highlights-plugin
+# @rsc-labs/backstage-highlights-plugin
 
 <img src='https://raw.githubusercontent.com/RSC-Labs/backstage-highlights-plugin/main/docs/highlighter.png' width='100' height='150' alt='Highlights screenshot'>
 
@@ -20,6 +20,7 @@ npx @backstage/create-app
 ```
 
 Then, you will need to install and configure the highlights plugins for the frontend and the backend.
+Backend plugin installation can be found here: [Backend plugin](https://github.com/RSC-Labs/backstage-highlights-plugin/tree/main/plugins/backstage-highlights-plugin-backend)
 
 # Frontend plugin
 
