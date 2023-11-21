@@ -1,4 +1,4 @@
-# @rsc-labs/highlights-plugin
+# @rsc-labs/backstage-highlights-plugin
 
 <img src='./docs/highlighter.png' width='100' height='150' alt='Highlights screenshot'>
 
