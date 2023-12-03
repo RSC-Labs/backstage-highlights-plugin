@@ -35,23 +35,29 @@ export const GitInfoTagField = ({tags} : {tags: GitTag[]}) => {
         return <GitInfoTagTable tags={tags}/>;
     };
 
+    if (tags.length) {
+        return (
+            <>
+                <Link color="primary" to="" onClick={(event) => {
+                    event.preventDefault();
+                    openDialog();
+                }}>
+                {tags[0].name}
+                </Link>
+                <Dialog
+                open={open}
+                onClose={closeDialog}
+                    aria-labelledby="dialog-title"
+                    aria-describedby="dialog-description"
+                >
+                    <DialogContent>{dialogContent()}</DialogContent>
+                </Dialog>
+            </>
+        );
+    }
     return (
-        <>
-            <Link color="primary" to="" onClick={(event) => {
-                event.preventDefault();
-                openDialog();
-            }}>
-            {tags[0].name}
-            </Link>
-            <Dialog
-            open={open}
-            onClose={closeDialog}
-                aria-labelledby="dialog-title"
-                aria-describedby="dialog-description"
-            >
-                <DialogContent>{dialogContent()}</DialogContent>
-            </Dialog>
-        </>
-    );
+        <>No tag</>
+    )
+    
 };
   

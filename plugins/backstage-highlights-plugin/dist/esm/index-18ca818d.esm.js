@@ -111,7 +111,7 @@ const EntityHighlightsCard = backstageHighlightsPlugin.provide(
   createComponentExtension({
     name: "EntityHighlightsCard",
     component: {
-      lazy: () => import('./index-8911d4f9.esm.js').then((m) => m.HighlightsCard)
+      lazy: () => import('./index-dc7f0817.esm.js').then((m) => m.HighlightsCard)
     }
   })
 );
@@ -138,4 +138,4 @@ const DefaultGitInfoFields = [
 ];
 
 export { DefaultGitInfoFields as D, EHighlightFields as E, GITHUB_ANNOTATION_PROJECT_SLUG as G, GITLAB_ANNOTATION_PROJECT_SLUG as a, EntityHighlightsCard as b, highlightsApiRef as h };
-//# sourceMappingURL=index-8dc1066e.esm.js.map
+//# sourceMappingURL=index-18ca818d.esm.js.map

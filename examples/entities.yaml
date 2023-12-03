@@ -14,7 +14,8 @@ metadata:
   name: example-website
   annotations:
     github.com/project-slug: rsc-labs/backstage-changelog-plugin
-    gitlab.com/project-slug: mordivgor/backstage-gitinfo-plugin 
+    gitlab.com/project-slug: mordivgor/backstage-gitinfo-plugin
+    gitlab.com/instance: gitlab1.com
 
 spec:
   type: website

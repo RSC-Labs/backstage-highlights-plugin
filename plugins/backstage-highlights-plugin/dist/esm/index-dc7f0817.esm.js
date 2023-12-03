@@ -3,7 +3,7 @@ import { makeStyles, Typography, CircularProgress, Dialog, DialogContent, Toolti
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useApi } from '@backstage/core-plugin-api';
 import { Alert } from '@material-ui/lab';
-import { h as highlightsApiRef, G as GITHUB_ANNOTATION_PROJECT_SLUG, a as GITLAB_ANNOTATION_PROJECT_SLUG, E as EHighlightFields, D as DefaultGitInfoFields } from './index-8dc1066e.esm.js';
+import { h as highlightsApiRef, G as GITHUB_ANNOTATION_PROJECT_SLUG, a as GITLAB_ANNOTATION_PROJECT_SLUG, E as EHighlightFields, D as DefaultGitInfoFields } from './index-18ca818d.esm.js';
 import useAsync from 'react-use/lib/useAsync';
 import { Link, Table, LinkButton, CopyTextButton, Progress } from '@backstage/core-components';
 import { DateTime } from 'luxon';
@@ -91,19 +91,22 @@ const GitInfoTagField = ({ tags }) => {
   const dialogContent = () => {
     return /* @__PURE__ */ React.createElement(GitInfoTagTable, { tags });
   };
-  return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Link, { color: "primary", to: "", onClick: (event) => {
-    event.preventDefault();
-    openDialog();
-  } }, tags[0].name), /* @__PURE__ */ React.createElement(
-    Dialog,
-    {
-      open,
-      onClose: closeDialog,
-      "aria-labelledby": "dialog-title",
-      "aria-describedby": "dialog-description"
-    },
-    /* @__PURE__ */ React.createElement(DialogContent, null, dialogContent())
-  ));
+  if (tags.length) {
+    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Link, { color: "primary", to: "", onClick: (event) => {
+      event.preventDefault();
+      openDialog();
+    } }, tags[0].name), /* @__PURE__ */ React.createElement(
+      Dialog,
+      {
+        open,
+        onClose: closeDialog,
+        "aria-labelledby": "dialog-title",
+        "aria-describedby": "dialog-description"
+      },
+      /* @__PURE__ */ React.createElement(DialogContent, null, dialogContent())
+    ));
+  }
+  return /* @__PURE__ */ React.createElement(React.Fragment, null, "No tag");
 };
 
 const GitInfoBranchesTable = ({ branches }) => {
@@ -347,4 +350,4 @@ const HighlightsCard = (props) => {
 };
 
 export { HighlightsCard };
-//# sourceMappingURL=index-8911d4f9.esm.js.map
+//# sourceMappingURL=index-dc7f0817.esm.js.map

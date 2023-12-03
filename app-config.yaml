@@ -34,8 +34,11 @@ backend:
 
 highlights:
   gitlab:
-    token: ${GITLAB_TOKEN}
-    apiBaseUrl: https://gitlab.com/api/v4
+    - token: ${GITLAB_TOKEN}
+      apiBaseUrl: https://gitlab.com/api/v4
+    - host: gitlab1.com
+      token: ${GITLAB_TOKEN}
+      apiBaseUrl: https://gitlab.com/api/v4
   github:
     token: ${GITHUB_TOKEN}
 
@@ -43,6 +46,9 @@ integrations:
   gitlab:
     - host: gitlab.com
       token: ${GITLAB_TOKEN}
+    - host: gitlab1.com
+      token: ${GITLAB_TOKEN}
+      apiBaseUrl: https://gitlab.com/api/v4
   github:
     - host: github.com
       token: ${GITHUB_TOKEN}

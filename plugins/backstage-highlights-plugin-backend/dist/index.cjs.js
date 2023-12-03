@@ -50,6 +50,9 @@ async function fetchGithubBranches(projectSlug, token, baseUrl) {
 async function fetchGitlabBranches(projectSlug, token, apiBaseUrl) {
   const slugSplitted = projectSlug.split("/");
   const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/branches?private_token=${token}`);
+  if (result.status !== 200) {
+    throw await errors.ResponseError.fromResponse(result);
+  }
   const resultJson = await result.json();
   const branches = resultJson.map((singleResult) => singleResult.name);
   return branches;
@@ -83,6 +86,9 @@ async function fetchGithubTags(projectSlug, token, baseUrl) {
 async function fetchGitlabTags(projectSlug, token, apiBaseUrl) {
   const slugSplitted = projectSlug.split("/");
   const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/tags?private_token=${token}`);
+  if (result.status !== 200) {
+    throw await errors.ResponseError.fromResponse(result);
+  }
   const resultJson = await result.json();
   const projectResult = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}?private_token=${token}`);
   const projectResultJson = await projectResult.json();
@@ -142,6 +148,9 @@ async function fetchGithubCommits(projectSlug, token, baseUrl) {
 async function fetchGitlabCommits(projectSlug, token, apiBaseUrl) {
   const slugSplitted = projectSlug.split("/");
   const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/commits?private_token=${token}`);
+  if (result.status !== 200) {
+    throw await errors.ResponseError.fromResponse(result);
+  }
   const resultJson = await result.json();
   const commits = resultJson.map((singleResult) => {
     return {
@@ -165,15 +174,37 @@ function getGithubConfigFromHighlights(config) {
   }
   return void 0;
 }
-function getGitlabConfigFromHighlights(config) {
-  const gitlabConfig = config.getOptionalConfig("highlights.gitlab");
-  if (gitlabConfig) {
-    return {
-      token: gitlabConfig.getOptionalString("token"),
-      apiBaseUrl: gitlabConfig.getOptionalString("apiBaseUrl")
-    };
+function getGitlabConfigFromHighlights(config, instance) {
+  try {
+    const gitlabConfigs = config.getOptionalConfigArray("highlights.gitlab");
+    if (gitlabConfigs && instance) {
+      for (let i = 0; i < gitlabConfigs.length; i++) {
+        if (gitlabConfigs[i].getOptionalString("host") && gitlabConfigs[i].getOptionalString("host") == instance) {
+          return {
+            token: gitlabConfigs[i].getOptionalString("token"),
+            apiBaseUrl: gitlabConfigs[i].getOptionalString("apiBaseUrl")
+          };
+        }
+      }
+      return void 0;
+    }
+    if (gitlabConfigs && gitlabConfigs.length) {
+      return {
+        token: gitlabConfigs[0].getOptionalString("token"),
+        apiBaseUrl: gitlabConfigs[0].getOptionalString("apiBaseUrl")
+      };
+    }
+    return void 0;
+  } catch {
+    const gitlabConfig = config.getOptionalConfig("highlights.gitlab");
+    if (gitlabConfig) {
+      return {
+        token: gitlabConfig.getOptionalString("token"),
+        apiBaseUrl: gitlabConfig.getOptionalString("apiBaseUrl")
+      };
+    }
+    return void 0;
   }
-  return void 0;
 }
 function getGithubConfig(config) {
   if (getGithubConfigFromHighlights(config)) {
@@ -189,12 +220,24 @@ function getGithubConfig(config) {
   }
   return void 0;
 }
-function getGitlabConfig(config) {
-  if (getGitlabConfigFromHighlights(config)) {
-    return getGitlabConfigFromHighlights(config);
+function getGitlabConfig(config, entity) {
+  var _a;
+  const gitlabInstanceAnnotation = (_a = entity == null ? void 0 : entity.metadata.annotations) == null ? void 0 : _a["gitlab.com/instance"];
+  if (getGitlabConfigFromHighlights(config, gitlabInstanceAnnotation)) {
+    return getGitlabConfigFromHighlights(config, gitlabInstanceAnnotation);
   }
   const gitlabConfigArray = config.getOptionalConfigArray("integrations.gitlab");
   if (gitlabConfigArray && gitlabConfigArray.length) {
+    if (gitlabInstanceAnnotation) {
+      for (let i = 0; i < gitlabConfigArray.length; i++) {
+        if (gitlabConfigArray[i].getOptionalString("host") && gitlabConfigArray[i].getOptionalString("host") == gitlabInstanceAnnotation) {
+          return {
+            token: gitlabConfigArray[i].getOptionalString("token"),
+            apiBaseUrl: gitlabConfigArray[i].getOptionalString("apiBaseUrl")
+          };
+        }
+      }
+    }
     const integrationConfig = integration.readGitLabIntegrationConfig(gitlabConfigArray[0]);
     return {
       token: integrationConfig.token,
@@ -235,7 +278,7 @@ async function createRouter(options) {
     }
     const gitlabProject = (_b = entity == null ? void 0 : entity.metadata.annotations) == null ? void 0 : _b["gitlab.com/project-slug"];
     if (gitlabProject) {
-      const gitlabConfig = getGitlabConfig(config);
+      const gitlabConfig = getGitlabConfig(config, entity);
       if (gitlabConfig && gitlabConfig.token && gitlabConfig.apiBaseUrl) {
         const result = await fetchGitlabBranches(gitlabProject, gitlabConfig.token, gitlabConfig.apiBaseUrl);
         return res.status(200).json({ branches: result });
@@ -266,7 +309,7 @@ async function createRouter(options) {
     }
     const gitlabProject = (_b = entity == null ? void 0 : entity.metadata.annotations) == null ? void 0 : _b["gitlab.com/project-slug"];
     if (gitlabProject) {
-      const gitlabConfig = getGitlabConfig(config);
+      const gitlabConfig = getGitlabConfig(config, entity);
       if (gitlabConfig && gitlabConfig.token && gitlabConfig.apiBaseUrl) {
         const result = await fetchGitlabTags(gitlabProject, gitlabConfig.token, gitlabConfig.apiBaseUrl);
         return res.status(200).json({ tags: result });
@@ -276,7 +319,6 @@ async function createRouter(options) {
   });
   router.get("/entity/:namespace/:kind/:name/fetchCommits", async (req, res) => {
     var _a2, _b;
-    console.log("fetchComimits-----------------------------------");
     const token = await tokenManager.getToken();
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
@@ -298,7 +340,7 @@ async function createRouter(options) {
     }
     const gitlabProject = (_b = entity == null ? void 0 : entity.metadata.annotations) == null ? void 0 : _b["gitlab.com/project-slug"];
     if (gitlabProject) {
-      const gitlabConfig = getGitlabConfig(config);
+      const gitlabConfig = getGitlabConfig(config, entity);
       if (gitlabConfig && gitlabConfig.token && gitlabConfig.apiBaseUrl) {
         const result = await fetchGitlabCommits(gitlabProject, gitlabConfig.token, gitlabConfig.apiBaseUrl);
         return res.status(200).json({ commits: result });

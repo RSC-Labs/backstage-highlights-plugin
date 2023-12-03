@@ -16,6 +16,7 @@
 
 import { Octokit,  } from '@octokit/rest';
 import { GitCommit } from '../types';
+import { ResponseError } from '@backstage/errors';
 
 export async function fetchGithubCommit(projectSlug: string, token: string, id: string, baseUrl?: string): Promise<GitCommit> {
     const octokit = new Octokit({
@@ -76,6 +77,10 @@ export async function fetchGitlabCommits(projectSlug: string, token: string, api
     const slugSplitted = projectSlug.split('/');
 
     const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/commits?private_token=${token}`);
+
+    if (result.status !== 200) {
+        throw await ResponseError.fromResponse(result);
+    }
     
     const resultJson = await result.json();
 
