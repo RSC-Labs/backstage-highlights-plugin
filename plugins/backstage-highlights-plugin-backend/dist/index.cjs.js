@@ -34,6 +34,24 @@ function _interopNamespace(e) {
 var express__namespace = /*#__PURE__*/_interopNamespace(express);
 var Router__default = /*#__PURE__*/_interopDefaultLegacy(Router);
 
+async function getGitlabProjectDetails(projectSlug, apiBaseUrl, token) {
+  return callAPI(`${apiBaseUrl}/projects/${encodeURIComponent(projectSlug)}`, token);
+}
+async function getGitlabTags(projectId, apiBaseUrl, token) {
+  return callAPI(`${apiBaseUrl}/projects/${projectId}/repository/tags`, token);
+}
+async function getGitlabBranches(projectId, apiBaseUrl, token) {
+  return callAPI(`${apiBaseUrl}/projects/${projectId}/repository/branches`, token);
+}
+async function callAPI(url, token) {
+  const options = { headers: { "PRIVATE-TOKEN": token } };
+  const response = await fetch(url, options);
+  if (response.status !== 200) {
+    throw await errors.ResponseError.fromResponse(response);
+  }
+  return await response.json();
+}
+
 async function fetchGithubBranches(projectSlug, token, baseUrl) {
   const octokit = new rest.Octokit({
     auth: token,
@@ -48,12 +66,9 @@ async function fetchGithubBranches(projectSlug, token, baseUrl) {
   return branches;
 }
 async function fetchGitlabBranches(projectSlug, token, apiBaseUrl) {
-  const slugSplitted = projectSlug.split("/");
-  const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/branches?private_token=${token}`);
-  if (result.status !== 200) {
-    throw await errors.ResponseError.fromResponse(result);
-  }
-  const resultJson = await result.json();
+  const projectDetails = await getGitlabProjectDetails(projectSlug, apiBaseUrl, token);
+  const projectId = projectDetails.id;
+  const resultJson = await getGitlabBranches(projectId, apiBaseUrl, token);
   const branches = resultJson.map((singleResult) => singleResult.name);
   return branches;
 }
@@ -84,20 +99,15 @@ async function fetchGithubTags(projectSlug, token, baseUrl) {
   return tags;
 }
 async function fetchGitlabTags(projectSlug, token, apiBaseUrl) {
-  const slugSplitted = projectSlug.split("/");
-  const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/tags?private_token=${token}`);
-  if (result.status !== 200) {
-    throw await errors.ResponseError.fromResponse(result);
-  }
-  const resultJson = await result.json();
-  const projectResult = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}?private_token=${token}`);
-  const projectResultJson = await projectResult.json();
-  const tags = resultJson.map((singleResult) => {
+  const projectDetails = await getGitlabProjectDetails(projectSlug, apiBaseUrl, token);
+  const projectId = projectDetails.id;
+  const tagsJson = await getGitlabTags(projectId, apiBaseUrl, token);
+  const tags = tagsJson.map((singleResult) => {
     return {
       name: singleResult.name,
-      tagUrl: `${projectResultJson.web_url}/-/releases/${singleResult.name}`,
+      tagUrl: `${projectDetails.web_url}/-/releases/${singleResult.name}`,
       commitId: singleResult.commit.id,
-      commitUrl: `${projectResultJson.web_url}/-/commit/${singleResult.commit.id}`,
+      commitUrl: `${projectDetails.web_url}/-/commit/${singleResult.commit.id}`,
       commitMessage: singleResult.commit.message
     };
   });
