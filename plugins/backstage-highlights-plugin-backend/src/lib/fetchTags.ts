@@ -16,7 +16,7 @@
 
 import { Octokit } from '@octokit/rest';
 import { GitTag } from '../types';
-import { ResponseError } from '@backstage/errors';
+import { getGitlabProjectDetails, getGitlabTags } from './gitlabApi';
 
 
 export async function fetchGithubTags(projectSlug: string, token: string, baseUrl?: string): Promise<GitTag[]> {
@@ -52,26 +52,17 @@ export async function fetchGithubTags(projectSlug: string, token: string, baseUr
 
 export async function fetchGitlabTags(projectSlug: string, token: string, apiBaseUrl: string): Promise<GitTag[]> {
 
-    const slugSplitted = projectSlug.split('/');
+    const projectDetails = await getGitlabProjectDetails(projectSlug, apiBaseUrl, token);
+    const projectId = projectDetails.id;
 
-    const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/tags?private_token=${token}`);
+    const tagsJson = await getGitlabTags(projectId, apiBaseUrl, token);
 
-    if (result.status !== 200) {
-        throw await ResponseError.fromResponse(result);
-    }
-
-    const resultJson = await result.json();
-
-    const projectResult = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}?private_token=${token}`);
-
-    const projectResultJson = await projectResult.json();
-
-    const tags = resultJson.map((singleResult: { name: any; commit: { id: any; message: any; }; }) => {
+    const tags = tagsJson.map((singleResult: { name: any; commit: { id: any; message: any; }; }) => {
         return {
             name: singleResult.name,
-            tagUrl: `${projectResultJson.web_url}/-/releases/${singleResult.name}`,
+            tagUrl: `${projectDetails.web_url}/-/releases/${singleResult.name}`,
             commitId: singleResult.commit.id,
-            commitUrl: `${projectResultJson.web_url}/-/commit/${singleResult.commit.id}`,
+            commitUrl: `${projectDetails.web_url}/-/commit/${singleResult.commit.id}`,
             commitMessage: singleResult.commit.message
         }
     })

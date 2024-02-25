@@ -16,7 +16,7 @@
 
 import { Octokit } from '@octokit/rest';
 import { GitBranch } from '../types';
-import { ResponseError } from '@backstage/errors';
+import { getGitlabBranches, getGitlabProjectDetails } from './gitlabApi';
 
 
 export async function fetchGithubBranches(projectSlug: string, token: string, baseUrl?: string): Promise<string[]> {
@@ -39,18 +39,12 @@ export async function fetchGithubBranches(projectSlug: string, token: string, ba
 
 export async function fetchGitlabBranches(projectSlug: string, token: string, apiBaseUrl: string): Promise<GitBranch[]> {
 
-    const slugSplitted = projectSlug.split('/');
+    const projectDetails = await getGitlabProjectDetails(projectSlug, apiBaseUrl, token);
+    const projectId = projectDetails.id;
 
-    const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/branches?private_token=${token}`);
-
-    if (result.status !== 200) {
-        throw await ResponseError.fromResponse(result);
-    }
-
-    const resultJson = await result.json();
+    const resultJson = await getGitlabBranches(projectId, apiBaseUrl, token);
 
     const branches = resultJson.map((singleResult: { name: any; }) => singleResult.name);
 
     return branches;
 }
-
