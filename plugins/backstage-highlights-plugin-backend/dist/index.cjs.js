@@ -43,6 +43,9 @@ async function getGitlabTags(projectId, apiBaseUrl, token) {
 async function getGitlabBranches(projectId, apiBaseUrl, token) {
   return callAPI(`${apiBaseUrl}/projects/${projectId}/repository/branches`, token);
 }
+async function getGitlabCommits(projectId, apiBaseUrl, token) {
+  return callAPI(`${apiBaseUrl}/projects/${projectId}/repository/commits`, token);
+}
 async function callAPI(url, token) {
   const options = { headers: { "PRIVATE-TOKEN": token } };
   const response = await fetch(url, options);
@@ -156,12 +159,9 @@ async function fetchGithubCommits(projectSlug, token, baseUrl) {
   return commits;
 }
 async function fetchGitlabCommits(projectSlug, token, apiBaseUrl) {
-  const slugSplitted = projectSlug.split("/");
-  const result = await fetch(`${apiBaseUrl}/projects/${slugSplitted[0]}%2F${slugSplitted[1]}/repository/commits?private_token=${token}`);
-  if (result.status !== 200) {
-    throw await errors.ResponseError.fromResponse(result);
-  }
-  const resultJson = await result.json();
+  const projectDetails = await getGitlabProjectDetails(projectSlug, apiBaseUrl, token);
+  const projectId = projectDetails.id;
+  const resultJson = await getGitlabCommits(projectId, apiBaseUrl, token);
   const commits = resultJson.map((singleResult) => {
     return {
       id: singleResult.id,
