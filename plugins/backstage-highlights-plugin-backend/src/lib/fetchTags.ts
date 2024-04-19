@@ -40,9 +40,9 @@ export async function fetchGithubTags(projectSlug: string, token: string, baseUr
     const tags: GitTag[] = githubTags.data.map(((singleData: { name: any, commit: any; }) => {
         return {
             name: singleData.name,
-            tagUrl: `${repoInfo.data.html_url} + '/releases/tag/' + ${singleData.name}`,
+            tagUrl: `${repoInfo.data.html_url}/releases/tag/${singleData.name}`,
             commitId: singleData.commit.sha,
-            commitUrl: `${repoInfo.data.html_url} + '/commits/' + ${singleData.commit.sha}`,
+            commitUrl: `${repoInfo.data.html_url}/commits/${singleData.commit.sha}`,
             commitApiUrl: singleData.commit.url
         }
     }));
