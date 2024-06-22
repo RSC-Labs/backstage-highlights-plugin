@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { errorHandler, TokenManager, PluginEndpointDiscovery } from '@backstage/backend-common';
 import { readGithubIntegrationConfig, readGitLabIntegrationConfig } from '@backstage/integration';
 import { CatalogClient, CatalogApi } from '@backstage/catalog-client';
 import { NotFoundError } from '@backstage/errors';
@@ -26,6 +25,8 @@ import { fetchGithubBranches, fetchGitlabBranches } from '../lib/fetchBranches';
 import { fetchGithubTags, fetchGitlabTags } from '../lib/fetchTags';
 import { fetchGithubCommits, fetchGithubCommit, fetchGitlabCommits } from '../lib/fetchCommits';
 import { Entity } from '@backstage/catalog-model';
+import { AuthService, DiscoveryService } from '@backstage/backend-plugin-api';
+import { errorHandler } from '@backstage/backend-common';
 
 type GithubConfig = {
   token?: string,
@@ -127,16 +128,16 @@ function getGitlabConfig(config: Config, entity: Entity): GitlabConfig | undefin
 
 export interface RouterOptions {
   logger: Logger;
-  tokenManager: TokenManager;
-  discovery: PluginEndpointDiscovery,
   config: Config;
-  catalogApi?: CatalogApi
+  discovery: DiscoveryService,
+  catalogApi?: CatalogApi,
+  auth: AuthService,
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, tokenManager, discovery, config } = options;
+  const { logger, config, discovery, auth } = options;
 
   const catalogApi =
     options.catalogApi ?? new CatalogClient({ discoveryApi: discovery });
@@ -149,11 +150,15 @@ export async function createRouter(
   });
 
   router.get('/entity/:namespace/:kind/:name/fetchBranches', async (req, res) => {
-    const token = await tokenManager.getToken();
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: 'catalog',
+    });
+
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token,
+      { token }
     );
     if (!entity) {
       throw new NotFoundError(
@@ -185,11 +190,15 @@ export async function createRouter(
   });
 
   router.get('/entity/:namespace/:kind/:name/fetchTags', async (req, res) => {
-    const token = await tokenManager.getToken();
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: 'catalog',
+    });
+
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token,
+      { token }
     );
     if (!entity) {
       throw new NotFoundError(
@@ -221,19 +230,22 @@ export async function createRouter(
   });
 
   router.get('/entity/:namespace/:kind/:name/fetchCommits', async (req, res) => {
+    
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: 'catalog',
+    });
 
-    const token = await tokenManager.getToken();
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token,
+      { token }
     );
     if (!entity) {
       throw new NotFoundError(
-        `No ${kind} entity in ${namespace} named "${name}"`,
-      );
-    }
-
+          `No ${kind} entity in ${namespace} named "${name}"`,
+        );
+      }
     const githubProject = entity?.metadata.annotations?.['github.com/project-slug'];
 
     if (githubProject) {
@@ -259,11 +271,16 @@ export async function createRouter(
 
   router.get('/entity/:namespace/:kind/:name/fetchCommits/:id', async (req, res) => {
 
-    const token = await tokenManager.getToken();
     const { namespace, kind, name, id } = req.params;
+
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: 'catalog',
+    });
+
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token,
+      { token }
     );
     if (!entity) {
       throw new NotFoundError(

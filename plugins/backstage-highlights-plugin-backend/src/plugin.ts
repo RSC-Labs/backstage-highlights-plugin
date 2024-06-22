@@ -33,17 +33,17 @@ export const highlightsPlugin = createBackendPlugin({
       deps: {
         logger: coreServices.logger,
         httpRouter: coreServices.httpRouter,
-        tokenManager: coreServices.tokenManager,
         discovery: coreServices.discovery,
         config: coreServices.rootConfig,
+        auth: coreServices.auth,
       },
-      async init({ logger, httpRouter, tokenManager, discovery, config }) {
+      async init({ logger, httpRouter, discovery, config, auth }) {
         httpRouter.use(
           await createRouter({
             logger: loggerToWinstonLogger(logger),
-            tokenManager: tokenManager,
             discovery: discovery,
-            config: config
+            config: config,
+            auth: auth,
           }),
         );
       },
