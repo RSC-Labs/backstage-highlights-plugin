@@ -2,13 +2,13 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var backendCommon = require('@backstage/backend-common');
 var integration = require('@backstage/integration');
 var catalogClient = require('@backstage/catalog-client');
 var errors = require('@backstage/errors');
 var express = require('express');
 var Router = require('express-promise-router');
 var rest = require('@octokit/rest');
+var backendCommon = require('@backstage/backend-common');
 var backendPluginApi = require('@backstage/backend-plugin-api');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -258,7 +258,7 @@ function getGitlabConfig(config, entity) {
 }
 async function createRouter(options) {
   var _a;
-  const { logger, tokenManager, discovery, config } = options;
+  const { logger, config, discovery, auth } = options;
   const catalogApi = (_a = options.catalogApi) != null ? _a : new catalogClient.CatalogClient({ discoveryApi: discovery });
   const router = Router__default["default"]();
   router.use(express__namespace.json());
@@ -267,11 +267,14 @@ async function createRouter(options) {
   });
   router.get("/entity/:namespace/:kind/:name/fetchBranches", async (req, res) => {
     var _a2, _b;
-    const token = await tokenManager.getToken();
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: "catalog"
+    });
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token
+      { token }
     );
     if (!entity) {
       throw new errors.NotFoundError(
@@ -298,11 +301,14 @@ async function createRouter(options) {
   });
   router.get("/entity/:namespace/:kind/:name/fetchTags", async (req, res) => {
     var _a2, _b;
-    const token = await tokenManager.getToken();
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: "catalog"
+    });
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token
+      { token }
     );
     if (!entity) {
       throw new errors.NotFoundError(
@@ -329,11 +335,14 @@ async function createRouter(options) {
   });
   router.get("/entity/:namespace/:kind/:name/fetchCommits", async (req, res) => {
     var _a2, _b;
-    const token = await tokenManager.getToken();
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: "catalog"
+    });
     const { namespace, kind, name } = req.params;
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token
+      { token }
     );
     if (!entity) {
       throw new errors.NotFoundError(
@@ -360,11 +369,14 @@ async function createRouter(options) {
   });
   router.get("/entity/:namespace/:kind/:name/fetchCommits/:id", async (req, res) => {
     var _a2;
-    const token = await tokenManager.getToken();
     const { namespace, kind, name, id } = req.params;
+    const { token } = await auth.getPluginRequestToken({
+      onBehalfOf: await auth.getOwnServiceCredentials(),
+      targetPluginId: "catalog"
+    });
     const entity = await catalogApi.getEntityByRef(
       { namespace, kind, name },
-      token
+      { token }
     );
     if (!entity) {
       throw new errors.NotFoundError(
@@ -394,17 +406,17 @@ const highlightsPlugin = backendPluginApi.createBackendPlugin({
       deps: {
         logger: backendPluginApi.coreServices.logger,
         httpRouter: backendPluginApi.coreServices.httpRouter,
-        tokenManager: backendPluginApi.coreServices.tokenManager,
         discovery: backendPluginApi.coreServices.discovery,
-        config: backendPluginApi.coreServices.rootConfig
+        config: backendPluginApi.coreServices.rootConfig,
+        auth: backendPluginApi.coreServices.auth
       },
-      async init({ logger, httpRouter, tokenManager, discovery, config }) {
+      async init({ logger, httpRouter, discovery, config, auth }) {
         httpRouter.use(
           await createRouter({
             logger: backendCommon.loggerToWinstonLogger(logger),
-            tokenManager,
             discovery,
-            config
+            config,
+            auth
           })
         );
       }
