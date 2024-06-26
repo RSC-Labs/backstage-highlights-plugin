@@ -18,7 +18,7 @@ import React, { useState }  from 'react';
 import { CopyTextButton, LinkButton } from '@backstage/core-components';
 import { Dialog, DialogContent, TextField } from '@material-ui/core';
 import { useEntity } from '@backstage/plugin-catalog-react';
-import { GITHUB_ANNOTATION_PROJECT_SLUG, GITLAB_ANNOTATION_PROJECT_SLUG } from '../util';
+import { GITHUB_ANNOTATION_PROJECT_SLUG, GITLAB_ANNOTATION_PROJECT_SLUG, GITLAB_ANNOTATION_INSTANCE } from '../util';
 import { Alert } from '@material-ui/lab';
 
 const GitInfoCloneDialog = () => {
@@ -26,15 +26,17 @@ const GitInfoCloneDialog = () => {
 
     const githubAnnotation = entity.metadata.annotations?.[GITHUB_ANNOTATION_PROJECT_SLUG];
     const gitlabAnnotation = entity.metadata.annotations?.[GITLAB_ANNOTATION_PROJECT_SLUG];
+    const gitlabInstance = entity.metadata.annotations?.[GITLAB_ANNOTATION_INSTANCE] ?? 'gitlab.com';
+
 
     let cloneUrl: string | undefined;
-    
+
     if (githubAnnotation) {
-        cloneUrl = `https://github.com/${githubAnnotation}.git`;
+      cloneUrl = `https://github.com/${githubAnnotation}.git`;
+    } else if (gitlabAnnotation) {
+      cloneUrl = `https://${gitlabInstance}/${gitlabAnnotation}.git`;
     }
-    if (gitlabAnnotation) {
-        cloneUrl = `https://gitlab.com/${gitlabAnnotation}.git`;
-    }
+
     if (cloneUrl) {
         return (
             <>
@@ -92,4 +94,3 @@ export const GitInfoCloneField = () => {
         </>
     );
 };
-  
