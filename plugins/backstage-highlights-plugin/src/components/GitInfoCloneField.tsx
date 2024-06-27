@@ -32,9 +32,10 @@ const GitInfoCloneDialog = () => {
     let cloneUrl: string | undefined;
 
     if (githubAnnotation) {
-      cloneUrl = `https://github.com/${githubAnnotation}.git`;
-    } else if (gitlabAnnotation) {
-      cloneUrl = `https://${gitlabInstance}/${gitlabAnnotation}.git`;
+        cloneUrl = `https://github.com/${githubAnnotation}.git`;
+    }
+    if (gitlabAnnotation) {
+        cloneUrl = `https://${gitlabInstance}/${gitlabAnnotation}.git`;
     }
 
     if (cloneUrl) {
