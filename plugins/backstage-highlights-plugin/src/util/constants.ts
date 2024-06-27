@@ -20,6 +20,7 @@ import { EHighlightFields } from "./types";
 export const GITHUB_ANNOTATION_PROJECT_SLUG = 'github.com/project-slug';
 /** @public */
 export const GITLAB_ANNOTATION_PROJECT_SLUG = 'gitlab.com/project-slug';
+export const GITLAB_ANNOTATION_INSTANCE = 'gitlab.com/instance';
 
 export const DefaultGitInfoFields: EHighlightFields[] = [
     EHighlightFields.latest_tag,
