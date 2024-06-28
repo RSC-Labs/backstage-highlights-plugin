@@ -3,7 +3,7 @@ import { makeStyles, Typography, CircularProgress, Dialog, DialogContent, Toolti
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useApi } from '@backstage/core-plugin-api';
 import { Alert } from '@material-ui/lab';
-import { h as highlightsApiRef, G as GITHUB_ANNOTATION_PROJECT_SLUG, a as GITLAB_ANNOTATION_PROJECT_SLUG, E as EHighlightFields, D as DefaultGitInfoFields } from './index-18ca818d.esm.js';
+import { h as highlightsApiRef, G as GITHUB_ANNOTATION_PROJECT_SLUG, a as GITLAB_ANNOTATION_PROJECT_SLUG, b as GITLAB_ANNOTATION_INSTANCE, E as EHighlightFields, D as DefaultGitInfoFields } from './index-9a116a4a.esm.js';
 import useAsync from 'react-use/lib/useAsync';
 import { Link, Table, LinkButton, CopyTextButton, Progress } from '@backstage/core-components';
 import { DateTime } from 'luxon';
@@ -241,16 +241,17 @@ const GtInfoAuthorField = ({ commits }) => {
 };
 
 const GitInfoCloneDialog = () => {
-  var _a, _b;
+  var _a, _b, _c, _d;
   const { entity } = useEntity();
   const githubAnnotation = (_a = entity.metadata.annotations) == null ? void 0 : _a[GITHUB_ANNOTATION_PROJECT_SLUG];
   const gitlabAnnotation = (_b = entity.metadata.annotations) == null ? void 0 : _b[GITLAB_ANNOTATION_PROJECT_SLUG];
+  const gitlabInstance = (_d = (_c = entity.metadata.annotations) == null ? void 0 : _c[GITLAB_ANNOTATION_INSTANCE]) != null ? _d : "gitlab.com";
   let cloneUrl;
   if (githubAnnotation) {
     cloneUrl = `https://github.com/${githubAnnotation}.git`;
   }
   if (gitlabAnnotation) {
-    cloneUrl = `https://gitlab.com/${gitlabAnnotation}.git`;
+    cloneUrl = `https://${gitlabInstance}/${gitlabAnnotation}.git`;
   }
   if (cloneUrl) {
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(
@@ -350,4 +351,4 @@ const HighlightsCard = (props) => {
 };
 
 export { HighlightsCard };
-//# sourceMappingURL=index-dc7f0817.esm.js.map
+//# sourceMappingURL=index-98782c19.esm.js.map

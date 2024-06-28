@@ -111,7 +111,7 @@ const EntityHighlightsCard = backstageHighlightsPlugin.provide(
   createComponentExtension({
     name: "EntityHighlightsCard",
     component: {
-      lazy: () => import('./index-dc7f0817.esm.js').then((m) => m.HighlightsCard)
+      lazy: () => import('./index-98782c19.esm.js').then((m) => m.HighlightsCard)
     }
   })
 );
@@ -128,6 +128,7 @@ var EHighlightFields = /* @__PURE__ */ ((EHighlightFields2) => {
 
 const GITHUB_ANNOTATION_PROJECT_SLUG = "github.com/project-slug";
 const GITLAB_ANNOTATION_PROJECT_SLUG = "gitlab.com/project-slug";
+const GITLAB_ANNOTATION_INSTANCE = "gitlab.com/instance";
 const DefaultGitInfoFields = [
   EHighlightFields.latest_tag,
   EHighlightFields.number_of_branches,
@@ -137,5 +138,5 @@ const DefaultGitInfoFields = [
   EHighlightFields.clone
 ];
 
-export { DefaultGitInfoFields as D, EHighlightFields as E, GITHUB_ANNOTATION_PROJECT_SLUG as G, GITLAB_ANNOTATION_PROJECT_SLUG as a, EntityHighlightsCard as b, highlightsApiRef as h };
-//# sourceMappingURL=index-18ca818d.esm.js.map
+export { DefaultGitInfoFields as D, EHighlightFields as E, GITHUB_ANNOTATION_PROJECT_SLUG as G, GITLAB_ANNOTATION_PROJECT_SLUG as a, GITLAB_ANNOTATION_INSTANCE as b, EntityHighlightsCard as c, highlightsApiRef as h };
+//# sourceMappingURL=index-9a116a4a.esm.js.map

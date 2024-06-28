@@ -1,4 +1,4 @@
-export { E as EHighlightFields, b as EntityHighlightsCard } from './esm/index-18ca818d.esm.js';
+export { E as EHighlightFields, c as EntityHighlightsCard } from './esm/index-9a116a4a.esm.js';
 import '@backstage/core-plugin-api';
 import '@backstage/catalog-model';
 import 'react-router-dom';
