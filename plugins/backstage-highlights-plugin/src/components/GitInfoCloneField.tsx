@@ -28,37 +28,52 @@ const GitInfoCloneDialog = () => {
     const gitlabAnnotation = entity.metadata.annotations?.[GITLAB_ANNOTATION_PROJECT_SLUG];
     const gitlabInstance = entity.metadata.annotations?.[GITLAB_ANNOTATION_INSTANCE] ?? 'gitlab.com';
 
-
-    let cloneUrl: string | undefined;
+    let cloneUrlHttps: string | undefined;
+    let cloneUrlSsh: string | undefined;
 
     if (githubAnnotation) {
-        cloneUrl = `https://github.com/${githubAnnotation}.git`;
+      cloneUrlHttps = `https://github.com/${githubAnnotation}.git`;
+      cloneUrlSsh = `git@github.com:${githubAnnotation}.git`;
     }
     if (gitlabAnnotation) {
-        cloneUrl = `https://${gitlabInstance}/${gitlabAnnotation}.git`;
+      cloneUrlHttps = `https://${gitlabInstance}/${gitlabAnnotation}.git`;
+      cloneUrlSsh = `git@${gitlabInstance}:${gitlabAnnotation}.git`;
     }
 
-    if (cloneUrl) {
-        return (
-            <>
-                <TextField
-                    id="outlined-read-only-input"
-                    label="HTTPS"
-                    defaultValue={cloneUrl}
-                    onFocus={event => {
-                        event.target.select();
-                    }}
-                    style={ { width: 400 }}
-                    InputProps={{
-                        readOnly: true,
-                    }}
-                />
-                <CopyTextButton text={cloneUrl} tooltipText='Copied!'/>
-            </>
-        );
+    if (cloneUrlHttps && cloneUrlSsh) {
+      return (
+        <>
+          <TextField
+            id="outlined-read-only-input-https"
+            label="HTTPS"
+            defaultValue={cloneUrlHttps}
+            onFocus={event => {
+              event.target.select();
+            }}
+            style={{ width: 400 }}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+          <CopyTextButton text={cloneUrlHttps} tooltipText='Copied!' />
+          <TextField
+            id="outlined-read-only-input-ssh"
+            label="SSH"
+            defaultValue={cloneUrlSsh}
+            onFocus={event => {
+              event.target.select();
+            }}
+            style={{ width: 400 }}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+          <CopyTextButton text={cloneUrlSsh} tooltipText='Copied!' />
+        </>
+      );
     }
-    return <Alert severity='error'>No annotation</Alert>
-}
+    return <Alert severity='error'>No annotation</Alert>;
+  };
 
 export const GitInfoCloneField = () => {
     const [open, setOpen] = useState(false);
