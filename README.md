@@ -7,6 +7,7 @@ Backstage Highlights Plugin is configurable and customizable plugin for viewing 
 ### Why?
 
 We have a lot information from different plugins and also in Overview tab, but sometimes:
+
 - we want to see some short summary from couple of plugins
 - we do not want to jump to every card to get such information
 
@@ -15,6 +16,7 @@ The "Highlights" shall provide you possibility to create such small, useful view
 # Getting started
 
 If you haven't already, check out the [Backstage docs](https://backstage.io/docs/getting-started/) and create a Backstage application with
+
 ```
 npx @backstage/create-app
 ```
@@ -24,6 +26,7 @@ Then, you will need to install and configure the highlights plugins for the fron
 # Frontend plugin
 
 Install:
+
 ```bash
 cd packages/app
 yarn add @rsc-labs/backstage-highlights-plugin
@@ -32,16 +35,21 @@ yarn add @rsc-labs/backstage-highlights-plugin
 ### Card:
 
 Add the card to `packages/app/src/components/catalog/EntityPage.tsx`:
+
 ```jsx
 // import:
-import { EntityHighlightsCard } from '@rsc-labs/backstage-highlights-plugin';
+import { isGitlabHighlightsAvailable, EntityHighlightsCard } from '@rsc-labs/backstage-highlights-plugin';
 
 // use it in entity view
 const overviewContent = (
   <Grid container
   ...
     <Grid item md={12} xs={12}>
-      <<EntityHighlightsCard />
+      <EntitySwitch>
+          <EntitySwitch.Case if={isGitlabHighlightsAvailable}>
+            <EntityHighlightsCard />
+          </EntitySwitch.Case>
+        </EntitySwitch>
     </Grid>
   </Grid>
 )
@@ -56,6 +64,7 @@ Of course, you can also make it smaller and near the other card.
 ### Built-in fields
 
 At this moment, "highlights plugin" comes with built-in support of basic information about Git. As you can see in above picture, we support following fields:
+
 - latest tag
 - number of branches
 - latest commit
@@ -80,45 +89,46 @@ Below you can find an interface:
 ```typescript
 /** @public */
 export interface EntityHighlightsProps {
-    fields? : EHighlightFields[],
-    customFields?: HighlightCustomField[]
+  fields?: EHighlightFields[];
+  customFields?: HighlightCustomField[];
 }
 ```
 
-1) fields - this parameter describes what built-in you would like to see and in what order
-2) customFields - this parameter can let you define your own field. Every custom field contains:
-    - fieldLabel - it is a title of the field (you can see it in built-in fields). It is optional parameter as your field can be also without a title (example: Clone button in built-in fields)
-    - field - it is simple React component
+1. fields - this parameter describes what built-in you would like to see and in what order
+2. customFields - this parameter can let you define your own field. Every custom field contains:
+   - fieldLabel - it is a title of the field (you can see it in built-in fields). It is optional parameter as your field can be also without a title (example: Clone button in built-in fields)
+   - field - it is simple React component
 
 # Backend plugin
 
 Install:
+
 ```bash
 cd packages/backend
 yarn add @rsc-labs/backstage-highlights-plugin-backend
 ```
 
 Create a file `packages/backend/src/plugins/highlights.ts`:
+
 ```typescript
-import {
-    createRouter,
-  } from '@rsc-labs/backstage-highlights-plugin-backend';
-  import { Router } from 'express';
-  import { PluginEnvironment } from '../types';
-  
-  export default async function createPlugin(
-    env: PluginEnvironment,
-  ): Promise<Router> {
-    return await createRouter({
-      discovery: env.discovery,
-      tokenManager: env.tokenManager,
-      logger: env.logger,
-      config: env.config
-    });
-  }
+import { createRouter } from '@rsc-labs/backstage-highlights-plugin-backend';
+import { Router } from 'express';
+import { PluginEnvironment } from '../types';
+
+export default async function createPlugin(
+  env: PluginEnvironment,
+): Promise<Router> {
+  return await createRouter({
+    discovery: env.discovery,
+    tokenManager: env.tokenManager,
+    logger: env.logger,
+    config: env.config,
+  });
+}
 ```
 
 Add the plugin to `packages/backend/src/index.ts`:
+
 ```typescript
 // import:
 import highlights from './plugins/highlights';
@@ -155,15 +165,16 @@ Both <b>/project-slug</b> are supported (so your component can be in github or g
 
 <b>gitlab.com/instance</b> annotation is used for [Multiple Gitlab instances](#multiple-gitlab-instances)
 
-
 ## App-config
 
 To have properly working Github or Gitlab, you need also provide information about token and potentially about base url.
 You have two options how to provide it
-1) Custom highlights configuration
-2) Integration configuration
+
+1. Custom highlights configuration
+2. Integration configuration
 
 Below you can find implemented both options:
+
 ```yaml
 highlights:
   gitlab:
@@ -174,9 +185,9 @@ highlights:
 
 integrations:
   gitlab:
-      - token: ${GITLAB_TOKEN}
+    - token: ${GITLAB_TOKEN}
   github:
-      - token: ${GITHUB_TOKEN}
+    - token: ${GITHUB_TOKEN}
 ```
 
 If provided, "highlights" configuration takes precendece over "integrations".
@@ -186,10 +197,11 @@ If provided, "highlights" configuration takes precendece over "integrations".
 
 We start supporting also multiple Gitlab instances for both highlights and integrations in app-config. Below you can find instruction and example of configuration.
 
-1) If you would like to use "highlights" configuration, then you need to change it to a list instead of one object. Additionally, we need to be able to figure out which instance is used for which entity, so <b>host</b> annotation is needed (see example below). For backward compatibility, we still support single object.
-2) Similarly with <b>integrations</b>. We already support a list, but to use multiple Gitlab instances, you need to also provide <b>host</b> and <b>apiBaseUrl</b> (see example below)
+1. If you would like to use "highlights" configuration, then you need to change it to a list instead of one object. Additionally, we need to be able to figure out which instance is used for which entity, so <b>host</b> annotation is needed (see example below). For backward compatibility, we still support single object.
+2. Similarly with <b>integrations</b>. We already support a list, but to use multiple Gitlab instances, you need to also provide <b>host</b> and <b>apiBaseUrl</b> (see example below)
 
 Example of both options in one configuration:
+
 ```yaml
 highlights:
   gitlab:
@@ -215,6 +227,7 @@ integrations:
 ```
 
 At the same time, your entity shall have proper annotations, for example:
+
 ```yaml
 apiVersion: backstage.io/v1alpha1
 kind: Component
@@ -227,6 +240,7 @@ metadata:
 ```
 
 Taking above example - component <b>example-website</b> will use <b>gitlab1.com</b>, which maps to values:
+
 - host: gitlab1.com
 - token: ${GITLAB2_TOKEN}
 - apiBaseUrl: https://gitlab1.com/api/v4

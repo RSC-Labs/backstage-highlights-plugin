@@ -7,6 +7,7 @@ Backstage Highlights Plugin is configurable and customizable plugin for viewing 
 ### Why?
 
 We have a lot information from different plugins and also in Overview tab, but sometimes:
+
 - we want to see some short summary from couple of plugins
 - we do not want to jump to every card to get such information
 
@@ -15,6 +16,7 @@ The "Highlights" shall provide you possibility to create such small, useful view
 # Getting started
 
 If you haven't already, check out the [Backstage docs](https://backstage.io/docs/getting-started/) and create a Backstage application with
+
 ```
 npx @backstage/create-app
 ```
@@ -25,6 +27,7 @@ Backend plugin installation can be found here: [Backend plugin](https://github.c
 # Frontend plugin
 
 Install:
+
 ```bash
 cd packages/app
 yarn add @rsc-labs/backstage-highlights-plugin
@@ -33,16 +36,21 @@ yarn add @rsc-labs/backstage-highlights-plugin
 ### Card:
 
 Add the card to `packages/app/src/components/catalog/EntityPage.tsx`:
+
 ```jsx
 // import:
-import { EntityHighlightsCard } from '@rsc-labs/backstage-highlights-plugin';
+import { isGitlabHighlightsAvailable, EntityHighlightsCard } from '@rsc-labs/backstage-highlights-plugin';
 
 // use it in entity view
 const overviewContent = (
   <Grid container
   ...
     <Grid item md={12} xs={12}>
-      <<EntityHighlightsCard />
+      <EntitySwitch>
+          <EntitySwitch.Case if={isGitlabHighlightsAvailable}>
+            <EntityHighlightsCard />
+          </EntitySwitch.Case>
+        </EntitySwitch>
     </Grid>
   </Grid>
 )
@@ -57,6 +65,7 @@ Of course, you can also make it smaller and near the other card.
 ### Built-in fields
 
 At this moment, "highlights plugin" comes with built-in support of basic information about Git. As you can see in above picture, we support following fields:
+
 - latest tag
 - number of branches
 - latest commit
@@ -81,15 +90,15 @@ Below you can find an interface:
 ```typescript
 /** @public */
 export interface EntityHighlightsProps {
-    fields? : EHighlightFields[],
-    customFields?: HighlightCustomField[]
+  fields?: EHighlightFields[];
+  customFields?: HighlightCustomField[];
 }
 ```
 
-1) fields - this parameter describes what built-in you would like to see and in what order
-2) customFields - this parameter can let you define your own field. Every custom field contains:
-    - fieldLabel - it is a title of the field (you can see it in built-in fields). It is optional parameter as your field can be also without a title (example: Clone button in built-in fields)
-    - field - it is simple React component
+1. fields - this parameter describes what built-in you would like to see and in what order
+2. customFields - this parameter can let you define your own field. Every custom field contains:
+   - fieldLabel - it is a title of the field (you can see it in built-in fields). It is optional parameter as your field can be also without a title (example: Clone button in built-in fields)
+   - field - it is simple React component
 
 ## TODO
 
