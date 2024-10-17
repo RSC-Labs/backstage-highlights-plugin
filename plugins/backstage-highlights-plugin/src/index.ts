@@ -16,4 +16,4 @@
 
 export { EntityHighlightsCard } from './plugin';
 export { EHighlightFields } from './util';
-export type { HighlightCustomField, EntityHighlightsProps } from './util';
+export type { isHighlightsAvailable, isGithubHighlightsAvailable, isGitlabHighlightsAvailable, HighlightCustomField, EntityHighlightsProps } from './util';
